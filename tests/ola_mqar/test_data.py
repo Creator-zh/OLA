@@ -3,31 +3,27 @@ import torch
 from experiments.ola_mqar.data import MQARConfig, generate_mqar_batch
 
 
-def test_generate_mqar_batch_returns_mqar_sequence_labels_and_query_positions():
-    config = MQARConfig(vocab_size=128, input_seq_len=32, num_kv_pairs=4, random_non_queries=False)
+def test_generate_mqar_batch_returns_expected_shapes_and_valid_labels():
+    config = MQARConfig(vocab_size=128, num_pairs=4)
 
     batch = generate_mqar_batch(config, batch_size=8, device=torch.device("cpu"))
 
-    assert batch.input_ids.shape == (8, 32)
-    assert batch.labels.shape == (8, 32)
-    assert batch.query_mask.shape == (8, 32)
-    assert batch.query_mask.sum().item() == 8 * config.num_kv_pairs
-    assert torch.all(batch.labels[~batch.query_mask] == -100)
+    assert batch.input_ids.shape == (8, 10)
+    assert batch.labels.shape == (8,)
+    assert batch.query_positions.shape == (8,)
+    assert batch.value_positions.shape == (8,)
+    assert torch.all(batch.input_ids[:, -2] == config.query_token_id)
+    assert torch.all(batch.query_positions == 9)
 
-    key_positions = torch.arange(0, config.num_kv_pairs * 2, 2)
-    value_positions = torch.arange(1, config.num_kv_pairs * 2, 2)
-    for b in range(batch.input_ids.shape[0]):
-        mapping = {
-            int(batch.input_ids[b, key_pos]): int(batch.input_ids[b, value_pos])
-            for key_pos, value_pos in zip(key_positions, value_positions)
-        }
-        for position in torch.nonzero(batch.query_mask[b], as_tuple=False).flatten():
-            query_token = int(batch.input_ids[b, position])
-            assert int(batch.labels[b, position]) == mapping[query_token]
+    gathered_values = batch.input_ids[
+        torch.arange(batch.input_ids.shape[0]),
+        batch.value_positions,
+    ]
+    assert torch.equal(batch.labels, gathered_values)
 
 
 def test_generate_mqar_batch_is_reproducible_with_explicit_generator():
-    config = MQARConfig(vocab_size=128, input_seq_len=32, num_kv_pairs=4)
+    config = MQARConfig(vocab_size=128, num_pairs=4)
     generator_a = torch.Generator(device="cpu").manual_seed(123)
     generator_b = torch.Generator(device="cpu").manual_seed(123)
 

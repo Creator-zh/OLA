@@ -11,8 +11,6 @@ def test_build_jobs_covers_methods_num_pairs_and_seeds():
         batch_size=8,
         eval_batches=2,
         vocab_size=64,
-        input_seq_len=32,
-        power_a=0.01,
         d_models=(16, 32),
         state_dim=8,
         lr=0.003,

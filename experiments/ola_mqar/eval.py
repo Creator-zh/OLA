@@ -28,9 +28,7 @@ def main() -> None:
 
     data_config = MQARConfig(
         vocab_size=train_args["vocab_size"],
-        input_seq_len=train_args["input_seq_len"],
-        num_kv_pairs=train_args["num_pairs"],
-        power_a=train_args["power_a"],
+        num_pairs=train_args["num_pairs"],
     )
     model = MQARModel(
         method=train_args["method"],

@@ -27,5 +27,6 @@ class MQARModel(nn.Module):
     def forward(self, input_ids: torch.Tensor) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
         x = self.embedding(input_ids)
         mixed = self.mixer(x)
-        logits = self.lm_head(self.norm(mixed.hidden_states))
+        final_hidden = self.norm(mixed.hidden_states[:, -1])
+        logits = self.lm_head(final_hidden)
         return logits, mixed.aux

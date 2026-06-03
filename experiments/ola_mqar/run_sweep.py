@@ -21,8 +21,6 @@ class SweepConfig:
     batch_size: int
     eval_batches: int
     vocab_size: int
-    input_seq_len: int
-    power_a: float
     d_models: tuple[int, ...]
     state_dim: int
     lr: float
@@ -60,12 +58,10 @@ def build_jobs(config: SweepConfig) -> list[dict[str, Any]]:
                             "steps": config.steps,
                             "eval_interval": config.eval_interval,
                             "batch_size": config.batch_size,
-                            "eval_batches": config.eval_batches,
-                            "vocab_size": config.vocab_size,
-                            "input_seq_len": config.input_seq_len,
-                            "d_model": d_model,
-                            "state_dim": config.state_dim,
-                            "power_a": config.power_a,
+                        "eval_batches": config.eval_batches,
+                        "vocab_size": config.vocab_size,
+                        "d_model": d_model,
+                        "state_dim": config.state_dim,
                             "lr": config.lr,
                             "device": config.device,
                             "model_initialization_seed": seed,
@@ -86,8 +82,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--eval-batches", type=int, default=50)
     parser.add_argument("--vocab-size", type=int, default=128)
-    parser.add_argument("--input-seq-len", type=int, default=64)
-    parser.add_argument("--power-a", type=float, default=0.01)
     parser.add_argument("--d-model-list", type=_parse_int_list, default=(128,))
     parser.add_argument("--state-dim", type=int, default=32)
     parser.add_argument("--lr", type=float, default=3e-3)
@@ -109,8 +103,6 @@ def main() -> None:
         batch_size=args.batch_size,
         eval_batches=args.eval_batches,
         vocab_size=args.vocab_size,
-        input_seq_len=args.input_seq_len,
-        power_a=args.power_a,
         d_models=args.d_model_list,
         state_dim=args.state_dim,
         lr=args.lr,
@@ -134,9 +126,7 @@ def main() -> None:
             batch_size=job["batch_size"],
             eval_batches=job["eval_batches"],
             vocab_size=job["vocab_size"],
-            input_seq_len=job["input_seq_len"],
             num_pairs=job["num_pairs"],
-            power_a=job["power_a"],
             d_model=job["d_model"],
             state_dim=job["state_dim"],
             lr=job["lr"],

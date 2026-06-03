@@ -26,9 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--eval-batches", type=int, default=20)
     parser.add_argument("--vocab-size", type=int, default=128)
-    parser.add_argument("--input-seq-len", type=int, default=64)
-    parser.add_argument("--num-pairs", type=int, default=4)
-    parser.add_argument("--power-a", type=float, default=0.01)
+    parser.add_argument("--num-pairs", type=int, default=8)
     parser.add_argument("--d-model", type=int, default=128)
     parser.add_argument("--state-dim", type=int, default=32)
     parser.add_argument("--lr", type=float, default=3e-3)
@@ -50,9 +48,7 @@ def main() -> None:
         batch_size=args.batch_size,
         eval_batches=args.eval_batches,
         vocab_size=args.vocab_size,
-        input_seq_len=args.input_seq_len,
         num_pairs=args.num_pairs,
-        power_a=args.power_a,
         d_model=args.d_model,
         state_dim=args.state_dim,
         lr=args.lr,
@@ -69,9 +65,7 @@ def main() -> None:
         batch_size=args.batch_size,
         eval_batches=args.eval_batches,
         vocab_size=args.vocab_size,
-        input_seq_len=args.input_seq_len,
         num_pairs=args.num_pairs,
-        power_a=args.power_a,
         d_model=args.d_model,
         state_dim=args.state_dim,
         lr=args.lr,

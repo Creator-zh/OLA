@@ -15,5 +15,5 @@ def test_delta_and_ola_models_return_vocab_logits():
         )
         logits, aux = model(input_ids)
 
-        assert logits.shape == (3, 12, 64)
+        assert logits.shape == (3, 64)
         assert isinstance(aux, dict)

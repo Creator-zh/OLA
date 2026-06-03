@@ -19,9 +19,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--eval-batches", type=int, default=20)
     parser.add_argument("--vocab-size", type=int, default=128)
-    parser.add_argument("--input-seq-len", type=int, default=64)
-    parser.add_argument("--num-pairs", type=int, default=4)
-    parser.add_argument("--power-a", type=float, default=0.01)
+    parser.add_argument("--num-pairs", type=int, default=8)
     parser.add_argument("--d-model", type=int, default=128)
     parser.add_argument("--state-dim", type=int, default=32)
     parser.add_argument("--lr", type=float, default=3e-3)
@@ -35,14 +33,6 @@ def parse_args() -> argparse.Namespace:
 
 def make_generator(device: torch.device, seed: int) -> torch.Generator:
     return torch.Generator(device=device).manual_seed(seed)
-
-
-def sequence_cross_entropy(logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
-    return F.cross_entropy(
-        logits.reshape(-1, logits.shape[-1]),
-        labels.reshape(-1),
-        ignore_index=-100,
-    )
 
 
 def build_eval_batches(
@@ -76,11 +66,11 @@ def evaluate(
     last_aux: dict[str, torch.Tensor] = {}
     for batch in eval_data:
         logits, aux = model(batch.input_ids)
-        loss = sequence_cross_entropy(logits, batch.labels)
-        query_count = batch.query_mask.sum().item()
-        total_loss += loss.item() * query_count
-        total_correct += ((logits.argmax(dim=-1) == batch.labels) & batch.query_mask).sum().item()
-        total_count += query_count
+        loss = F.cross_entropy(logits, batch.labels)
+        batch_size = batch.input_ids.shape[0]
+        total_loss += loss.item() * batch_size
+        total_correct += (logits.argmax(dim=-1) == batch.labels).sum().item()
+        total_count += batch_size
         last_aux = aux
     aux_floats = {key: float(value.item()) for key, value in last_aux.items()}
     return total_loss / total_count, total_correct / total_count, aux_floats
@@ -93,9 +83,7 @@ def train_method(
     batch_size: int,
     eval_batches: int,
     vocab_size: int,
-    input_seq_len: int,
     num_pairs: int,
-    power_a: float,
     d_model: int,
     state_dim: int,
     lr: float,
@@ -108,12 +96,7 @@ def train_method(
     torch.manual_seed(seed)
     train_data_seed = seed + 100_000 if train_data_seed is None else train_data_seed
     eval_data_seed = seed + 200_000 if eval_data_seed is None else eval_data_seed
-    data_config = MQARConfig(
-        vocab_size=vocab_size,
-        input_seq_len=input_seq_len,
-        num_kv_pairs=num_pairs,
-        power_a=power_a,
-    )
+    data_config = MQARConfig(vocab_size=vocab_size, num_pairs=num_pairs)
     train_generator = make_generator(device, train_data_seed)
     eval_data = build_eval_batches(
         data_config=data_config,
@@ -142,7 +125,7 @@ def train_method(
             generator=train_generator,
         )
         logits, _ = model(batch.input_ids)
-        loss = sequence_cross_entropy(logits, batch.labels)
+        loss = F.cross_entropy(logits, batch.labels)
 
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
@@ -185,9 +168,7 @@ def main() -> None:
         batch_size=args.batch_size,
         eval_batches=args.eval_batches,
         vocab_size=args.vocab_size,
-        input_seq_len=args.input_seq_len,
         num_pairs=args.num_pairs,
-        power_a=args.power_a,
         d_model=args.d_model,
         state_dim=args.state_dim,
         lr=args.lr,
