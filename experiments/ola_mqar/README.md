@@ -1,4 +1,14 @@
-# OLA MQAR Minimal Experiment
+# Legacy OLA MQAR Minimal Experiment
+
+This directory is a legacy CPU-friendly sanity check for the OLA recurrence and a small pure-PyTorch Delta-style baseline.
+
+The main paper-aligned DeltaNet reproduction and OLA comparison now lives in:
+
+```text
+experiments/deltanet_ola
+```
+
+Use `experiments/deltanet_ola` for DeltaNet paper MQAR settings, FLA DeltaNet baseline runs, short LM reproduction scaffolding, and throughput/memory benchmarks.
 
 This standalone PyTorch experiment compares a DeltaNet-style recurrence against the proposed OLA Cayley-transition recurrence on a single-query associative recall sanity check.
 
@@ -67,9 +77,9 @@ This script is a separate sanity check for the multi-query label structure only.
 python -m experiments.ola_mqar.validate_multiquery
 ```
 
-## Paper-Style MQAR: FLA DeltaNet vs OLA
+## Deprecated Paper-Style MQAR Entry Point
 
-`paper_mqar_experiment.py` is the GPU-oriented entry point for matching the MQAR setting used by the DeltaNet paper more closely. It calls `fla.layers.DeltaNet` for the baseline and uses OLA for the proposed method.
+`paper_mqar_experiment.py` is kept for compatibility with earlier local work. Prefer `experiments.deltanet_ola.mqar.train`, which records run metadata, throughput, peak memory, and uses the FLA submodule as the pinned DeltaNet source.
 
 Required in the GPU environment:
 

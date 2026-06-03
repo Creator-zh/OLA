@@ -1,0 +1,22 @@
+name: short_smoke
+hardware: 4x_rtx_4090_24gb
+model:
+  method: delta_net_or_ola
+  hidden_size: 256
+  num_hidden_layers: 4
+  num_heads: 4
+  head_dim: 64
+training:
+  context_length: 2048
+  target_tokens: 1048576
+  per_device_batch_size: 1
+  gradient_accumulation_steps: 1
+  learning_rate: 0.0003
+  min_learning_rate: 0.00003
+  weight_decay: 0.01
+  gradient_clip: 1.0
+  dtype: bf16
+data:
+  tokenizer: mistralai/Mistral-7B-v0.1
+  dataset: SlimPajama subset compatible with FLA legacy training
+
